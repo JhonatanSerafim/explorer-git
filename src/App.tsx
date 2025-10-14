@@ -1,128 +1,390 @@
 import { useState } from 'react'
-import './App.css'
+
+interface Repository {
+  id: number
+  name: string
+  full_name: string
+  description: string
+  stargazers_count: number
+  updated_at: string
+  html_url: string
+  language: string
+}
+
+interface SearchResponse {
+  items: Repository[]
+  total_count: number
+}
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [repositories, setRepositories] = useState<Repository[]>([])
+  const [loading, setLoading] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [sortBy, setSortBy] = useState('stars')
+  const [language, setLanguage] = useState('all')
+  const [totalPages, setTotalPages] = useState(0)
+  const [error, setError] = useState('')
+
+  const itemsPerPage = 10
+
+  const searchRepositories = async (query: string, page: number = 1) => {
+    if (!query.trim()) {
+      setRepositories([])
+      return
+    }
+
+    setLoading(true)
+    setError('')
+
+    try {
+      const sortParam = sortBy === 'stars' ? 'stars' : 'updated'
+      const orderParam = sortBy === 'stars' ? 'desc' : 'desc'
+      
+      let queryString = `${query}`
+      if (language !== 'all') {
+        queryString += ` language:${language}`
+      }
+
+      const response = await fetch(
+        `https://api.github.com/search/repositories?q=${encodeURIComponent(queryString)}&sort=${sortParam}&order=${orderParam}&page=${page}&per_page=${itemsPerPage}`
+      )
+
+      if (!response.ok) {
+        throw new Error('Erro ao buscar repositórios')
+      }
+
+      const data: SearchResponse = await response.json()
+      setRepositories(data.items)
+      setTotalPages(Math.ceil(data.total_count / itemsPerPage))
+    } catch (err) {
+      setError('Erro ao buscar repositórios. Tente novamente.')
+      setRepositories([])
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSearch = () => {
+    setCurrentPage(1)
+    searchRepositories(searchTerm, 1)
+  }
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+    searchRepositories(searchTerm, page)
+  }
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60))
+    
+    if (diffInHours < 24) {
+      return `${diffInHours} hours ago`
+    } else if (diffInHours < 48) {
+      return 'yesterday'
+    } else {
+      const diffInDays = Math.floor(diffInHours / 24)
+      return `${diffInDays} days ago`
+    }
+  }
+
+  const formatStars = (count: number) => {
+    if (count >= 1000) {
+      return `${(count / 1000).toFixed(1)}k`
+    }
+    return count.toString()
+  }
+
+  const renderPagination = () => {
+    const pages = []
+    const maxVisiblePages = 7
+    
+    // Calcular páginas visíveis
+    let startPage = Math.max(1, currentPage - 3)
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1)
+    
+    if (endPage - startPage < maxVisiblePages - 1) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1)
+    }
+
+    // Botão Previous
+    pages.push(
+      <button
+        key="prev"
+        onClick={() => handlePageChange(currentPage - 1)}
+        disabled={currentPage === 1}
+        className="px-3 py-2 text-sm font-medium text-gray-500 bg-gray-800 border border-gray-600 rounded-lg hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        ← Previous
+      </button>
+    )
+
+    // Primeira página
+    if (startPage > 1) {
+      pages.push(
+        <button
+          key={1}
+          onClick={() => handlePageChange(1)}
+          className="px-3 py-2 text-sm font-medium text-gray-500 bg-gray-800 border border-gray-600 rounded-lg hover:bg-gray-700"
+        >
+          1
+        </button>
+      )
+      
+      if (startPage > 2) {
+        pages.push(
+          <span key="ellipsis1" className="px-3 py-2 text-sm text-gray-400">
+            ...
+          </span>
+        )
+      }
+    }
+
+    // Páginas visíveis
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(
+        <button
+          key={i}
+          onClick={() => handlePageChange(i)}
+          className={`px-3 py-2 text-sm font-medium rounded-lg ${
+            i === currentPage
+              ? 'text-white bg-blue-600 border border-blue-600'
+              : 'text-gray-500 bg-gray-800 border border-gray-600 hover:bg-gray-700'
+          }`}
+        >
+          {i}
+        </button>
+      )
+    }
+
+    // Última página
+    if (endPage < totalPages) {
+      if (endPage < totalPages - 1) {
+        pages.push(
+          <span key="ellipsis2" className="px-3 py-2 text-sm text-gray-400">
+            ...
+          </span>
+        )
+      }
+      
+      pages.push(
+        <button
+          key={totalPages}
+          onClick={() => handlePageChange(totalPages)}
+          className="px-3 py-2 text-sm font-medium text-gray-500 bg-gray-800 border border-gray-600 rounded-lg hover:bg-gray-700"
+        >
+          {totalPages}
+        </button>
+      )
+    }
+
+    // Botão Next
+    pages.push(
+      <button
+        key="next"
+        onClick={() => handlePageChange(currentPage + 1)}
+        disabled={currentPage === totalPages}
+        className="px-3 py-2 text-sm font-medium text-gray-500 bg-gray-800 border border-gray-600 rounded-lg hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        Next →
+      </button>
+    )
+
+    return pages
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="container mx-auto px-4 py-16">
-        <div className="max-w-4xl mx-auto">
-          {/* Header */}
-          <div className="text-center mb-16">
-            <h1 className="text-5xl font-bold text-gray-900 mb-4">
-              Explorer Git
-            </h1>
-            <p className="text-xl text-gray-600 mb-8">
-              Projeto React com TypeScript e Tailwind CSS
-            </p>
-            <div className="flex justify-center space-x-4">
-              <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
-                React
-              </span>
-              <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
-                TypeScript
-              </span>
-              <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
-                Tailwind CSS
-              </span>
-              <span className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-medium">
-                Vite
-              </span>
-            </div>
-          </div>
-
-          {/* Card Principal */}
-          <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
-            <div className="text-center">
-              <h2 className="text-3xl font-semibold text-gray-800 mb-6">
-                Contador Interativo
-              </h2>
-              <div className="mb-8">
-                <div className="text-6xl font-bold text-indigo-600 mb-4">
-                  {count}
+    <div className="min-h-screen bg-gray-900 text-white">
+      {/* Header */}
+      <header className="bg-gray-800 border-b border-gray-700">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            {/* Logo */}
+            <div className="flex items-center">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                  <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
+                  </svg>
                 </div>
-                <p className="text-gray-600 mb-6">
-                  Clique nos botões abaixo para interagir
-                </p>
-              </div>
-              
-              <div className="flex justify-center space-x-4">
-                <button
-                  onClick={() => setCount(count - 1)}
-                  className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors duration-200 shadow-md hover:shadow-lg"
-                >
-                  Diminuir
-                </button>
-                <button
-                  onClick={() => setCount(0)}
-                  className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors duration-200 shadow-md hover:shadow-lg"
-                >
-                  Resetar
-                </button>
-                <button
-                  onClick={() => setCount(count + 1)}
-                  className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors duration-200 shadow-md hover:shadow-lg"
-                >
-                  Aumentar
-                </button>
+                <h1 className="text-xl font-bold">Repo Explorer</h1>
               </div>
             </div>
-          </div>
 
-          {/* Cards de Features */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <div className="text-blue-600 mb-4">
-                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            {/* User Profile */}
+            <div className="flex items-center space-x-4">
+              <button className="text-gray-400 hover:text-white">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5-5-5h5v-5a7.5 7.5 0 1 0-15 0v5z" />
                 </svg>
+              </button>
+              <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center">
+                <span className="text-sm font-medium">U</span>
               </div>
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                Rápido
-              </h3>
-              <p className="text-gray-600">
-                Desenvolvido com Vite para uma experiência de desenvolvimento ultra-rápida.
-              </p>
             </div>
-
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <div className="text-green-600 mb-4">
-                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                Type-Safe
-              </h3>
-              <p className="text-gray-600">
-                TypeScript garante que seu código seja mais seguro e fácil de manter.
-              </p>
-            </div>
-
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <div className="text-purple-600 mb-4">
-                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                Responsivo
-              </h3>
-              <p className="text-gray-600">
-                Tailwind CSS torna fácil criar designs responsivos e modernos.
-              </p>
-            </div>
-          </div>
-
-          {/* Footer */}
-          <div className="text-center mt-16">
-            <p className="text-gray-600">
-              Projeto criado com ❤️ usando as melhores tecnologias
-            </p>
           </div>
         </div>
-      </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Search Section */}
+        <div className="mb-8">
+          <div className="flex flex-col sm:flex-row gap-4 mb-6">
+            <div className="flex-1">
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Search for repositories..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                  className="block w-full pl-10 pr-3 py-3 border border-gray-600 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+            <button
+              onClick={handleSearch}
+              disabled={loading}
+              className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? 'Buscando...' : 'Buscar'}
+            </button>
+          </div>
+
+          {/* Filters */}
+          {repositories.length > 0 && (
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold">Search Results</h2>
+              <div className="flex space-x-4">
+                <select
+                  value={language}
+                  onChange={(e) => setLanguage(e.target.value)}
+                  className="bg-gray-800 border border-gray-600 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="all">Language: All</option>
+                  <option value="javascript">JavaScript</option>
+                  <option value="typescript">TypeScript</option>
+                  <option value="python">Python</option>
+                  <option value="java">Java</option>
+                  <option value="go">Go</option>
+                  <option value="rust">Rust</option>
+                  <option value="php">PHP</option>
+                </select>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="bg-gray-800 border border-gray-600 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="stars">Sort by: Most Stars</option>
+                  <option value="updated">Sort by: Recently Updated</option>
+                </select>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Results */}
+        {error && (
+          <div className="bg-red-900 border border-red-700 text-red-100 px-4 py-3 rounded-lg mb-6">
+            {error}
+          </div>
+        )}
+
+        {repositories.length > 0 ? (
+          <>
+            {/* Repository Table */}
+            <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-700">
+                  <thead className="bg-gray-700">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                        REPOSITORY
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                        DESCRIPTION
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                        STARS
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                        LAST UPDATED
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                        ACTION
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-gray-800 divide-y divide-gray-700">
+                    {repositories.map((repo) => (
+                      <tr key={repo.id} className="hover:bg-gray-750">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-white">{repo.name}</div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="text-sm text-gray-300 max-w-md truncate">
+                            {repo.description || 'No description available'}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center text-sm text-gray-300">
+                            <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                            {formatStars(repo.stargazers_count)}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                          {formatDate(repo.updated_at)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <a
+                            href={repo.html_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-400 hover:text-blue-300 text-sm font-medium"
+                          >
+                            View
+                          </a>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="mt-8 flex justify-center">
+                <nav className="flex space-x-2">
+                  {renderPagination()}
+                </nav>
+              </div>
+            )}
+          </>
+        ) : !loading && searchTerm && (
+          <div className="text-center py-12">
+            <div className="text-gray-400 text-lg">Nenhum repositório encontrado</div>
+            <div className="text-gray-500 text-sm mt-2">Tente ajustar sua busca</div>
+          </div>
+        )}
+
+        {!searchTerm && (
+          <div className="text-center py-12">
+            <div className="text-gray-400 text-lg">Digite um termo para buscar repositórios</div>
+            <div className="text-gray-500 text-sm mt-2">Exemplo: react, vue, angular</div>
+          </div>
+        )}
+      </main>
     </div>
   )
 }
