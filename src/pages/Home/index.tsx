@@ -9,7 +9,10 @@ const Home: React.FC = () => {
     loading,
     currentPage,
     sortBy,
+    sortOrder,
     language,
+    minStars,
+    updatedAfter,
     totalPages,
     error,
     hasSearched,
@@ -17,7 +20,10 @@ const Home: React.FC = () => {
     handleSearch,
     handlePageChange,
     handleLanguageChange,
+    handleMinStarsChange,
+    handleUpdatedAfterChange,
     handleSortChange,
+    handleSortOrderChange,
   } = useGithubSearch();
 
   const formatDate = (dateString: string) => {
@@ -182,31 +188,77 @@ const Home: React.FC = () => {
 
           {/* Filters */}
           {repositories.length > 0 && (
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold">Resultados da Busca</h2>
-              <div className="flex space-x-4">
-                <select
-                  value={language}
-                  onChange={(e) => handleLanguageChange(e.target.value)}
-                  className="bg-gray-800 border border-gray-600 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="all">Linguagem: Todas</option>
-                  <option value="javascript">JavaScript</option>
-                  <option value="typescript">TypeScript</option>
-                  <option value="python">Python</option>
-                  <option value="java">Java</option>
-                  <option value="go">Go</option>
-                  <option value="rust">Rust</option>
-                  <option value="php">PHP</option>
-                </select>
-                <select
-                  value={sortBy}
-                  onChange={(e) => handleSortChange(e.target.value)}
-                  className="bg-gray-800 border border-gray-600 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="stars">Ordenar por: Mais Estrelas</option>
-                  <option value="updated">Ordenar por: Atualizado Recentemente</option>
-                </select>
+            <div className="mb-6">
+              <h2 className="text-xl font-semibold mb-4">Filtros</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+                {/* Filtro de Linguagem */}
+                <div className="flex flex-col">
+                  <label className="text-sm text-gray-400 mb-1">Linguagem</label>
+                  <select
+                    value={language}
+                    onChange={(e) => handleLanguageChange(e.target.value)}
+                    className="bg-gray-800 border border-gray-600 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="all">Todas</option>
+                    <option value="javascript">JavaScript</option>
+                    <option value="typescript">TypeScript</option>
+                    <option value="python">Python</option>
+                    <option value="java">Java</option>
+                    <option value="go">Go</option>
+                    <option value="rust">Rust</option>
+                    <option value="php">PHP</option>
+                  </select>
+                </div>
+
+                {/* Filtro de Estrelas Mínimas */}
+                <div className="flex flex-col">
+                  <label className="text-sm text-gray-400 mb-1">Estrelas Mínimas</label>
+                  <input
+                    type="number"
+                    value={minStars}
+                    onChange={(e) => handleMinStarsChange(e.target.value)}
+                    placeholder="Ex: 100"
+                    className="bg-gray-800 border border-gray-600 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-500"
+                  />
+                </div>
+
+                {/* Filtro de Data de Atualização */}
+                <div className="flex flex-col">
+                  <label className="text-sm text-gray-400 mb-1">Atualizado Após</label>
+                  <input
+                    type="date"
+                    value={updatedAfter}
+                    onChange={(e) => handleUpdatedAfterChange(e.target.value)}
+                    className="bg-gray-800 border border-gray-600 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                {/* Filtro de Ordenação */}
+                <div className="flex flex-col">
+                  <label className="text-sm text-gray-400 mb-1">Ordenar Por</label>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => handleSortChange(e.target.value)}
+                    className="bg-gray-800 border border-gray-600 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="stars">Estrelas</option>
+                    <option value="updated">Data de Atualização</option>
+                    <option value="name">Nome (A-Z)</option>
+                  </select>
+                </div>
+
+                {/* Filtro de Ordem */}
+                <div className="flex flex-col">
+                  <label className="text-sm text-gray-400 mb-1">Ordem</label>
+                  <select
+                    value={sortOrder}
+                    onChange={(e) => handleSortOrderChange(e.target.value)}
+                    className="bg-gray-800 border border-gray-600 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="desc">Decrescente</option>
+                    <option value="asc">Crescente</option>
+                  </select>
+                </div>
               </div>
             </div>
           )}
@@ -228,16 +280,73 @@ const Home: React.FC = () => {
                   <thead className="bg-gray-700">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                        REPOSITÓRIO
+                        <button
+                          onClick={() => {
+                            if (sortBy === 'name') {
+                              handleSortOrderChange(sortOrder === 'asc' ? 'desc' : 'asc');
+                            } else {
+                              handleSortChange('name');
+                              handleSortOrderChange('asc');
+                            }
+                          }}
+                          className="flex items-center space-x-1 hover:text-white transition-colors"
+                        >
+                          <span>REPOSITÓRIO</span>
+                          <svg className={`w-4 h-4 ${sortBy === 'name' ? 'text-blue-400' : 'text-gray-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            {sortBy === 'name' && sortOrder === 'asc' ? (
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                            ) : (
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            )}
+                          </svg>
+                        </button>
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                         DESCRIÇÃO
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                        ESTRELAS
+                        <button
+                          onClick={() => {
+                            if (sortBy === 'stars') {
+                              handleSortOrderChange(sortOrder === 'asc' ? 'desc' : 'asc');
+                            } else {
+                              handleSortChange('stars');
+                              handleSortOrderChange('desc');
+                            }
+                          }}
+                          className="flex items-center space-x-1 hover:text-white transition-colors"
+                        >
+                          <span>ESTRELAS</span>
+                          <svg className={`w-4 h-4 ${sortBy === 'stars' ? 'text-blue-400' : 'text-gray-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            {sortBy === 'stars' && sortOrder === 'desc' ? (
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            ) : (
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                            )}
+                          </svg>
+                        </button>
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                        ÚLTIMA ATUALIZAÇÃO
+                        <button
+                          onClick={() => {
+                            if (sortBy === 'updated') {
+                              handleSortOrderChange(sortOrder === 'asc' ? 'desc' : 'asc');
+                            } else {
+                              handleSortChange('updated');
+                              handleSortOrderChange('desc');
+                            }
+                          }}
+                          className="flex items-center space-x-1 hover:text-white transition-colors"
+                        >
+                          <span>ÚLTIMA ATUALIZAÇÃO</span>
+                          <svg className={`w-4 h-4 ${sortBy === 'updated' ? 'text-blue-400' : 'text-gray-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            {sortBy === 'updated' && sortOrder === 'desc' ? (
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            ) : (
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                            )}
+                          </svg>
+                        </button>
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                         AÇÃO
@@ -303,6 +412,10 @@ const Home: React.FC = () => {
           <div className="text-center py-12">
             <div className="text-gray-400 text-lg">Digite um termo para buscar repositórios</div>
             <div className="text-gray-500 text-sm mt-2">Exemplo: react, vue, angular</div>
+            <div className="text-gray-600 text-xs mt-4 max-w-md mx-auto">
+              💡 <strong>Dica:</strong> A API do GitHub tem limite de 60 requisições por hora. 
+              Use os filtros para refinar sua busca e evitar muitas consultas.
+            </div>
           </div>
         )}
       </main>

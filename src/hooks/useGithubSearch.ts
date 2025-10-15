@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { Repository } from '../types';
 import { githubApi } from '../services/githubApi';
 
@@ -8,10 +8,14 @@ export const useGithubSearch = () => {
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState('stars');
+  const [sortOrder, setSortOrder] = useState('desc');
   const [language, setLanguage] = useState('all');
+  const [minStars, setMinStars] = useState('');
+  const [updatedAfter, setUpdatedAfter] = useState('');
   const [totalPages, setTotalPages] = useState(0);
   const [error, setError] = useState('');
   const [hasSearched, setHasSearched] = useState(false);
+  const searchTimeoutRef = useRef<number | null>(null);
 
   const itemsPerPage = 5;
 
@@ -20,7 +24,16 @@ export const useGithubSearch = () => {
     setError('');
 
     try {
-      const data = await githubApi.searchRepositories(query, page, itemsPerPage, sortBy, language);
+      const data = await githubApi.searchRepositories(
+        query, 
+        page, 
+        itemsPerPage, 
+        sortBy, 
+        sortOrder,
+        language, 
+        minStars, 
+        updatedAfter
+      );
       setRepositories(data.items);
       
       // Limitar o número máximo de páginas (GitHub API tem limite de 1000 resultados)
@@ -39,7 +52,7 @@ export const useGithubSearch = () => {
     } finally {
       setLoading(false);
     }
-  }, [sortBy, language, itemsPerPage]);
+  }, [sortBy, sortOrder, language, minStars, updatedAfter, itemsPerPage]);
 
   const handleSearch = useCallback(() => {
     if (!searchTerm.trim()) {
@@ -65,12 +78,54 @@ export const useGithubSearch = () => {
     setLanguage(newLanguage);
     if (searchTerm.trim() && hasSearched) {
       setCurrentPage(1);
-      searchRepositories(searchTerm, 1);
+      // Debounce para evitar muitas requisições
+      if (searchTimeoutRef.current) {
+        window.clearTimeout(searchTimeoutRef.current);
+      }
+      searchTimeoutRef.current = window.setTimeout(() => {
+        searchRepositories(searchTerm, 1);
+      }, 500);
+    }
+  }, [searchTerm, hasSearched, searchRepositories]);
+
+  const handleMinStarsChange = useCallback((stars: string) => {
+    setMinStars(stars);
+    if (searchTerm.trim() && hasSearched) {
+      setCurrentPage(1);
+      // Debounce para evitar muitas requisições
+      if (searchTimeoutRef.current) {
+        window.clearTimeout(searchTimeoutRef.current);
+      }
+      searchTimeoutRef.current = window.setTimeout(() => {
+        searchRepositories(searchTerm, 1);
+      }, 500);
+    }
+  }, [searchTerm, hasSearched, searchRepositories]);
+
+  const handleUpdatedAfterChange = useCallback((date: string) => {
+    setUpdatedAfter(date);
+    if (searchTerm.trim() && hasSearched) {
+      setCurrentPage(1);
+      // Debounce para evitar muitas requisições
+      if (searchTimeoutRef.current) {
+        window.clearTimeout(searchTimeoutRef.current);
+      }
+      searchTimeoutRef.current = window.setTimeout(() => {
+        searchRepositories(searchTerm, 1);
+      }, 500);
     }
   }, [searchTerm, hasSearched, searchRepositories]);
 
   const handleSortChange = useCallback((newSortBy: string) => {
     setSortBy(newSortBy);
+    if (searchTerm.trim() && hasSearched) {
+      setCurrentPage(1);
+      searchRepositories(searchTerm, 1);
+    }
+  }, [searchTerm, hasSearched, searchRepositories]);
+
+  const handleSortOrderChange = useCallback((newSortOrder: string) => {
+    setSortOrder(newSortOrder);
     if (searchTerm.trim() && hasSearched) {
       setCurrentPage(1);
       searchRepositories(searchTerm, 1);
@@ -84,7 +139,10 @@ export const useGithubSearch = () => {
     loading,
     currentPage,
     sortBy,
+    sortOrder,
     language,
+    minStars,
+    updatedAfter,
     totalPages,
     error,
     hasSearched,
@@ -94,6 +152,9 @@ export const useGithubSearch = () => {
     handleSearch,
     handlePageChange,
     handleLanguageChange,
+    handleMinStarsChange,
+    handleUpdatedAfterChange,
     handleSortChange,
+    handleSortOrderChange,
   };
 };
