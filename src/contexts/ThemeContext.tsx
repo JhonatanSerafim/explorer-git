@@ -1,26 +1,16 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useEffect, useState } from 'react';
+import { Theme, ThemeContextType, ThemeProviderProps } from '../types';
 
-type Theme = 'light' | 'dark';
+/**
+ * Contexto de tema da aplicação
+ * Exportado para ser usado pelo hook useTheme
+ */
+export const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-interface ThemeContextType {
-  theme: Theme;
-  toggleTheme: () => void;
-}
-
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
-
-export const useTheme = () => {
-  const context = useContext(ThemeContext);
-  if (context === undefined) {
-    throw new Error('useTheme must be used within a ThemeProvider');
-  }
-  return context;
-};
-
-interface ThemeProviderProps {
-  children: React.ReactNode;
-}
-
+/**
+ * Provider do contexto de tema
+ * Gerencia o estado do tema e persiste no localStorage
+ */
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const [theme, setTheme] = useState<Theme>(() => {
     // Verificar se há tema salvo no localStorage

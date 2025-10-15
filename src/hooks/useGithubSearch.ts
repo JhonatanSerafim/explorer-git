@@ -1,8 +1,8 @@
 import { useState, useCallback } from 'react';
-import { Repository } from '../types';
+import { Repository, UseGithubSearchReturn } from '../types';
 import { githubApi } from '../services/githubApi';
 
-export const useGithubSearch = () => {
+export const useGithubSearch = (): UseGithubSearchReturn => {
   const [searchTerm, setSearchTerm] = useState('');
   const [repositories, setRepositories] = useState<Repository[]>([]);
   const [loading, setLoading] = useState(false);

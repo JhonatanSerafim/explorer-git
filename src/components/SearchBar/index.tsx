@@ -1,11 +1,5 @@
 import React from 'react';
-
-interface SearchBarProps {
-  searchTerm: string;
-  setSearchTerm: (term: string) => void;
-  handleSearch: () => void;
-  loading: boolean;
-}
+import { SearchBarProps } from '../../types';
 
 const SearchBar: React.FC<SearchBarProps> = ({
   searchTerm,

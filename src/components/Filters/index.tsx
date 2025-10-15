@@ -1,14 +1,5 @@
 import React, { useState } from 'react';
-
-interface FiltersProps {
-  language: string;
-  minStars: string;
-  updatedAfter: string;
-  onLanguageChange: (language: string) => void;
-  onMinStarsChange: (stars: string) => void;
-  onUpdatedAfterChange: (date: string) => void;
-  onApplyFilters: () => void;
-}
+import { FiltersProps } from '../../types';
 
 const Filters: React.FC<FiltersProps> = ({
   language,

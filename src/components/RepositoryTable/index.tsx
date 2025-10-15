@@ -1,13 +1,5 @@
 import React from 'react';
-import { Repository } from '../../types';
-
-interface RepositoryTableProps {
-  repositories: Repository[];
-  sortBy: string;
-  sortOrder: string;
-  onSortChange: (sortBy: string) => void;
-  onSortOrderChange: (sortOrder: string) => void;
-}
+import { RepositoryTableProps } from '../../types';
 
 const RepositoryTable: React.FC<RepositoryTableProps> = ({
   repositories,

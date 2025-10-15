@@ -6,7 +6,7 @@ function Footer() {
         <div className="flex justify-center items-center h-16">
           <p className="text-gray-600 dark:text-gray-400">
             <span className="text-gray-500 dark:text-gray-500">Desenvolvido por </span>
-            <span className="font-semibold text-gray-700 dark:text-gray-300">Jhonatan Serfim</span>
+            <span className="font-semibold text-gray-700 dark:text-gray-300">Jhonatan Serafim</span>
           </p>
         </div>
       </div>

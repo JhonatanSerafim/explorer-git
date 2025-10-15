@@ -47,7 +47,6 @@ export const githubApi = {
         throw new Error('Parâmetros de busca inválidos. Tente uma busca diferente.');
       } else if (response.status === 403) {
         const resetTime = response.headers.get('X-RateLimit-Reset');
-        const remaining = response.headers.get('X-RateLimit-Remaining');
         
         if (resetTime) {
           const resetDate = new Date(parseInt(resetTime) * 1000);

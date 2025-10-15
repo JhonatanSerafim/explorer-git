@@ -209,7 +209,7 @@ Gerencia todo o estado e lógica da busca:
 
 ## 👨‍💻 Autor
 
-**Jhonatan Serfim**
+**Jhonatan Serafim**
 
 Desenvolvido com ❤️ demonstrando as melhores práticas de desenvolvimento com React, TypeScript e Tailwind CSS.
 
