@@ -34,7 +34,7 @@ Antes de iniciar o desenvolvimento, criei um **protótipo completo no Figma** pa
 
 **🎨 Acesse o protótipo completo:** [Figma - Explorer Git](https://www.figma.com/design/mUPQUipFqMmNJpdN8md8ko/Explorer-Git?node-id=0-1&t=HrZaU870iKZZu0Ji-1)
 
-> 💡 **Diferencial:** O desenvolvimento seguiu fielmente o protótipo, demonstrando habilidade em traduzir designs para código funcional com alta fidelidade.
+> 💡 **Diferencial:** O desenvolvimento seguiu o protótipo, porém durante o desenvolvimento inclui novos compoentes e funcionalidade.
 
 ### 🎯 Destaques Técnicos
 
