@@ -12,6 +12,7 @@ const Home: React.FC = () => {
     language,
     totalPages,
     error,
+    hasSearched,
     setSearchTerm,
     handleSearch,
     handlePageChange,
@@ -41,6 +42,13 @@ const Home: React.FC = () => {
     return count.toString();
   };
 
+  const truncateName = (name: string, maxLength: number = 20) => {
+    if (name.length <= maxLength) {
+      return name;
+    }
+    return name.substring(0, maxLength) + '...';
+  };
+
   const renderPagination = () => {
     const pages = [];
     const maxVisiblePages = 7;
@@ -58,7 +66,7 @@ const Home: React.FC = () => {
       <button
         key="prev"
         onClick={() => handlePageChange(currentPage - 1)}
-        disabled={currentPage === 1}
+        disabled={currentPage <= 1}
         className="px-3 py-2 text-sm font-medium text-gray-500 bg-gray-800 border border-gray-600 rounded-lg hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         ← Anterior
@@ -129,7 +137,7 @@ const Home: React.FC = () => {
       <button
         key="next"
         onClick={() => handlePageChange(currentPage + 1)}
-        disabled={currentPage === totalPages}
+        disabled={currentPage >= totalPages || totalPages === 0}
         className="px-3 py-2 text-sm font-medium text-gray-500 bg-gray-800 border border-gray-600 rounded-lg hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         Próximo →
@@ -140,9 +148,9 @@ const Home: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="h-full bg-gray-900 text-white overflow-hidden">
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 h-full overflow-auto">
         {/* Search Section */}
         <div className="mb-8">
           <div className="flex flex-col sm:flex-row gap-4 mb-6">
@@ -240,7 +248,7 @@ const Home: React.FC = () => {
                     {repositories.map((repo: Repository) => (
                       <tr key={repo.id} className="hover:bg-gray-750">
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-white">{repo.name}</div>
+                          <div className="text-sm font-medium text-white">{truncateName(repo.name)}</div>
                         </td>
                         <td className="px-6 py-4">
                           <div className="text-sm text-gray-300 max-w-md truncate">
@@ -284,14 +292,14 @@ const Home: React.FC = () => {
               </div>
             )}
           </>
-        ) : !loading && searchTerm && (
+        ) : !loading && hasSearched && (
           <div className="text-center py-12">
             <div className="text-gray-400 text-lg">Nenhum repositório encontrado</div>
             <div className="text-gray-500 text-sm mt-2">Tente ajustar sua busca</div>
           </div>
         )}
 
-        {!searchTerm && (
+        {!hasSearched && (
           <div className="text-center py-12">
             <div className="text-gray-400 text-lg">Digite um termo para buscar repositórios</div>
             <div className="text-gray-500 text-sm mt-2">Exemplo: react, vue, angular</div>

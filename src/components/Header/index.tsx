@@ -1,11 +1,9 @@
 
-function index() {
+function Header() {
   return (
-    <div>
-        {/* Header */}
-      <header className="bg-gray-800 border-b border-gray-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+    <header className="bg-gray-800 border-b border-gray-700 h-16 flex-shrink-0">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <div className="flex items-center">
               <div className="flex items-center space-x-3">
@@ -14,7 +12,7 @@ function index() {
                     <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
                   </svg>
                 </div>
-                <h1 className="text-xl font-bold">Repo Explorer</h1>
+                <h1 className="text-xl font-bold">Explorer Git</h1>
               </div>
             </div>
 
@@ -32,8 +30,7 @@ function index() {
           </div>
         </div>
       </header>
-    </div>
   )
 }
 
-export default index
+export default Header

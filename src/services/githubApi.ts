@@ -30,7 +30,15 @@ export const githubApi = {
     const response = await fetch(url);
 
     if (!response.ok) {
-      throw new Error('Erro ao buscar repositórios');
+      if (response.status === 422) {
+        throw new Error('Parâmetros de busca inválidos. Tente uma busca diferente.');
+      } else if (response.status === 403) {
+        throw new Error('Limite de requisições excedido. Tente novamente mais tarde.');
+      } else if (response.status === 404) {
+        throw new Error('Página não encontrada. Tente uma página anterior.');
+      } else {
+        throw new Error(`Erro ao buscar repositórios (${response.status})`);
+      }
     }
 
     const data = await response.json();
