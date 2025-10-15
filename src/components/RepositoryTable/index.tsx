@@ -1,5 +1,5 @@
 import React from 'react';
-import { RepositoryTableProps } from '../../types';
+import { Repository, RepositoryTableProps } from '../../types';
 
 const RepositoryTable: React.FC<RepositoryTableProps> = ({
   repositories,
