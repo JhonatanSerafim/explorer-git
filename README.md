@@ -24,7 +24,7 @@ Este projeto foi desenvolvido como parte de um processo seletivo, com foco em de
 
 ### 🎨 Processo de Design
 
-Antes de iniciar o desenvolvimento, criei um **protótipo completo no Figma** para definir a estrutura, layout e fluxo da aplicação. Este processo de design prévio foi fundamental para:
+Antes de iniciar o desenvolvimento, criei um **protótipo no Figma** para definir a estrutura, layout e fluxo da aplicação. Este processo de design prévio foi fundamental para:
 
 - ✅ **Visualizar a UI/UX** antes da implementação
 - ✅ **Definir a paleta de cores** e identidade visual
