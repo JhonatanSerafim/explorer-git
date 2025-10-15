@@ -4,11 +4,13 @@
 
 [![Deploy on Vercel](https://img.shields.io/badge/Deploy-Vercel-black?style=for-the-badge&logo=vercel)](https://explorer-git.vercel.app/)
 [![Live Demo](https://img.shields.io/badge/Live-Demo-success?style=for-the-badge&logo=vercel)](https://explorer-git.vercel.app/)
+[![Figma Prototype](https://img.shields.io/badge/Figma-Protótipo-F24E1E?style=for-the-badge&logo=figma&logoColor=white)](https://www.figma.com/design/mUPQUipFqMmNJpdN8md8ko/Explorer-Git?node-id=0-1&t=HrZaU870iKZZu0Ji-1)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 
-**🔗 Acesse a aplicação:** [https://explorer-git.vercel.app/](https://explorer-git.vercel.app/)
+**🔗 Acesse a aplicação:** [https://explorer-git.vercel.app/](https://explorer-git.vercel.app/)  
+**🎨 Veja o protótipo:** [Figma Design](https://www.figma.com/design/mUPQUipFqMmNJpdN8md8ko/Explorer-Git?node-id=0-1&t=HrZaU870iKZZu0Ji-1)
 
 Uma aplicação web moderna, responsiva e performática para explorar repositórios do GitHub, demonstrando as melhores práticas de desenvolvimento front-end.
 
@@ -19,6 +21,20 @@ Uma aplicação web moderna, responsiva e performática para explorar repositór
 ## 📋 Sobre o Projeto
 
 Este projeto foi desenvolvido como parte de um processo seletivo, com foco em demonstrar **qualidade de código**, **arquitetura escalável** e **boas práticas de desenvolvimento**. A aplicação consome a API pública do GitHub para buscar, filtrar e ordenar repositórios de forma intuitiva e eficiente.
+
+### 🎨 Processo de Design
+
+Antes de iniciar o desenvolvimento, criei um **protótipo completo no Figma** para definir a estrutura, layout e fluxo da aplicação. Este processo de design prévio foi fundamental para:
+
+- ✅ **Visualizar a UI/UX** antes da implementação
+- ✅ **Definir a paleta de cores** e identidade visual
+- ✅ **Planejar a responsividade** para diferentes dispositivos
+- ✅ **Estabelecer o tema Dark/Light** desde o início
+- ✅ **Organizar os componentes** de forma lógica e intuitiva
+
+**🎨 Acesse o protótipo completo:** [Figma - Explorer Git](https://www.figma.com/design/mUPQUipFqMmNJpdN8md8ko/Explorer-Git?node-id=0-1&t=HrZaU870iKZZu0Ji-1)
+
+> 💡 **Diferencial:** O desenvolvimento seguiu fielmente o protótipo, demonstrando habilidade em traduzir designs para código funcional com alta fidelidade.
 
 ### 🎯 Destaques Técnicos
 
@@ -579,12 +595,13 @@ Desenvolvedor Front-End apaixonado por criar experiências de usuário excepcion
 
 ### 🎯 Competências Demonstradas neste Projeto
 
+- ✅ **UX/UI Design** - Prototipação no Figma antes da implementação
 - ✅ **React & TypeScript** - Domínio de conceitos avançados
 - ✅ **Arquitetura de Software** - Padrões e boas práticas
 - ✅ **Design Patterns** - Custom Hooks, Service Layer, Context API
 - ✅ **Responsividade** - Mobile-first approach
 - ✅ **Performance** - Otimizações e memoization
-- ✅ **UX/UI** - Interface intuitiva e acessível
+- ✅ **Design to Code** - Tradução fiel de protótipo para código
 - ✅ **API Integration** - Consumo robusto de APIs REST
 - ✅ **Git & GitHub** - Versionamento e conventional commits
 - ✅ **Deploy & DevOps** - CI/CD com Vercel
@@ -602,6 +619,8 @@ Cada linha de código foi pensada para ser **legível**, **manutenível** e **es
 <div align="center">
 
 [![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-explorer--git.vercel.app-success?style=for-the-badge)](https://explorer-git.vercel.app/)
+
+[![Figma Prototype](https://img.shields.io/badge/🎨_Protótipo_Figma-Design_System-F24E1E?style=for-the-badge&logo=figma)](https://www.figma.com/design/mUPQUipFqMmNJpdN8md8ko/Explorer-Git?node-id=0-1&t=HrZaU870iKZZu0Ji-1)
 
 [![GitHub Repo](https://img.shields.io/badge/📦_GitHub_Repo-JhonatanSerafim%2Fexplorer--git-blue?style=for-the-badge&logo=github)](https://github.com/JhonatanSerafim/explorer-git)
 
