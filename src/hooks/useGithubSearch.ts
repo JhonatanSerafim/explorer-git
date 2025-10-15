@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback } from 'react';
 import { Repository } from '../types';
 import { githubApi } from '../services/githubApi';
 
@@ -15,7 +15,6 @@ export const useGithubSearch = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [error, setError] = useState('');
   const [hasSearched, setHasSearched] = useState(false);
-  const searchTimeoutRef = useRef<number | null>(null);
 
   const itemsPerPage = 5;
 
@@ -60,8 +59,58 @@ export const useGithubSearch = () => {
       setHasSearched(false);
       return;
     }
+    
+    // Resetar todos os filtros ao fazer uma nova busca
+    setLanguage('all');
+    setMinStars('');
+    setUpdatedAfter('');
+    setSortBy('stars');
+    setSortOrder('desc');
     setCurrentPage(1);
     setHasSearched(true);
+    
+    // Fazer busca com filtros resetados
+    // Usamos a API diretamente aqui para garantir que os filtros estão resetados
+    setLoading(true);
+    setError('');
+
+    githubApi.searchRepositories(
+      searchTerm, 
+      1, 
+      itemsPerPage, 
+      'stars', 
+      'desc',
+      'all', 
+      '', 
+      ''
+    ).then(data => {
+      setRepositories(data.items);
+      
+      const maxResults = Math.min(data.total_count, 1000);
+      const calculatedPages = Math.ceil(maxResults / itemsPerPage);
+      setTotalPages(calculatedPages);
+      
+      if (1 > calculatedPages) {
+        setCurrentPage(1);
+      }
+    }).catch(() => {
+      setError('Erro ao buscar repositórios. Tente novamente.');
+      setRepositories([]);
+      setTotalPages(0);
+    }).finally(() => {
+      setLoading(false);
+    });
+  }, [searchTerm, itemsPerPage]);
+
+  const handleApplyFilters = useCallback(() => {
+    if (!searchTerm.trim()) {
+      setRepositories([]);
+      setHasSearched(false);
+      return;
+    }
+    setCurrentPage(1);
+    setHasSearched(true);
+    // Aplica filtros com o termo de busca atual
     searchRepositories(searchTerm, 1);
   }, [searchTerm, searchRepositories]);
 
@@ -76,61 +125,23 @@ export const useGithubSearch = () => {
 
   const handleLanguageChange = useCallback((newLanguage: string) => {
     setLanguage(newLanguage);
-    if (searchTerm.trim() && hasSearched) {
-      setCurrentPage(1);
-      // Debounce para evitar muitas requisições
-      if (searchTimeoutRef.current) {
-        window.clearTimeout(searchTimeoutRef.current);
-      }
-      searchTimeoutRef.current = window.setTimeout(() => {
-        searchRepositories(searchTerm, 1);
-      }, 500);
-    }
-  }, [searchTerm, hasSearched, searchRepositories]);
+  }, []);
 
   const handleMinStarsChange = useCallback((stars: string) => {
     setMinStars(stars);
-    if (searchTerm.trim() && hasSearched) {
-      setCurrentPage(1);
-      // Debounce para evitar muitas requisições
-      if (searchTimeoutRef.current) {
-        window.clearTimeout(searchTimeoutRef.current);
-      }
-      searchTimeoutRef.current = window.setTimeout(() => {
-        searchRepositories(searchTerm, 1);
-      }, 500);
-    }
-  }, [searchTerm, hasSearched, searchRepositories]);
+  }, []);
 
   const handleUpdatedAfterChange = useCallback((date: string) => {
     setUpdatedAfter(date);
-    if (searchTerm.trim() && hasSearched) {
-      setCurrentPage(1);
-      // Debounce para evitar muitas requisições
-      if (searchTimeoutRef.current) {
-        window.clearTimeout(searchTimeoutRef.current);
-      }
-      searchTimeoutRef.current = window.setTimeout(() => {
-        searchRepositories(searchTerm, 1);
-      }, 500);
-    }
-  }, [searchTerm, hasSearched, searchRepositories]);
+  }, []);
 
   const handleSortChange = useCallback((newSortBy: string) => {
     setSortBy(newSortBy);
-    if (searchTerm.trim() && hasSearched) {
-      setCurrentPage(1);
-      searchRepositories(searchTerm, 1);
-    }
-  }, [searchTerm, hasSearched, searchRepositories]);
+  }, []);
 
   const handleSortOrderChange = useCallback((newSortOrder: string) => {
     setSortOrder(newSortOrder);
-    if (searchTerm.trim() && hasSearched) {
-      setCurrentPage(1);
-      searchRepositories(searchTerm, 1);
-    }
-  }, [searchTerm, hasSearched, searchRepositories]);
+  }, []);
 
   return {
     // Estados
@@ -150,6 +161,7 @@ export const useGithubSearch = () => {
     // Funções
     setSearchTerm,
     handleSearch,
+    handleApplyFilters,
     handlePageChange,
     handleLanguageChange,
     handleMinStarsChange,

@@ -28,7 +28,11 @@ export const githubApi = {
       queryString += ` language:${language}`;
     }
     if (minStars && !isNaN(Number(minStars))) {
-      queryString += ` stars:>=${minStars}`;
+      const starsNum = Number(minStars);
+      // Busca por valor exato de estrelas (range mínimo de ±1)
+      const minRange = Math.max(0, starsNum - 1);
+      const maxRange = starsNum + 1;
+      queryString += ` stars:${minRange}..${maxRange}`;
     }
     if (updatedAfter) {
       queryString += ` pushed:>=${updatedAfter}`;
